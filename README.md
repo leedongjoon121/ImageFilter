@@ -1,5 +1,5 @@
 # Html5 Canvas 를 이용한 Image Pixel Manipulation Project
-### Producer Introduce 
+## Producer Introduce 
 ### name :  Dongjoonlee 
 ### nation : south korea
 ### date of birth : 1993.04.06
@@ -7,7 +7,7 @@
 ### email : ehdwns46@naver.com
 ### day of production : 2016.07.15~ 2016.08.30
 ### Supervisor : Heohyeon of Hancom inc. , DaHyunkim of Hancom inc. 
-
+<br/><br/>
 ##  기능 : 8 가지 기능(단, shadow는 Innershadow, FlexibleShadow, OuterShadow)
 ## black&white , Brightness, Contrast, Shadow, grayscale, Neon, Reflection, SoftEdge 
 <br/><br/>
