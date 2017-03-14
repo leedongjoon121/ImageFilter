@@ -10,6 +10,14 @@
 <br/><br/>
 # Image Pixel Manipulation기반 비트맵 알고리즘으로써 Dongjoon.js 구현
 ### ![사진](https://github.com/leedongjoon121/ImageFilter/blob/master/total/img_data/dongjoon_js.JPG?raw=true)
+```
+* reference Licence 
+ 1번. Created for the purposes of Multimedia Technology Course
+      CS AUEB 2014-2015
+      Stavropoulos Konstantinos #3100172 -- Contact
+ 2번. Free
+*/
+```
 <br/>
 ##  기능 : 8 가지 기능(단, shadow는 Innershadow, FlexibleShadow, OuterShadow)
 ## black&white , Brightness, Contrast, Shadow, grayscale, Neon, Reflection, SoftEdge 
