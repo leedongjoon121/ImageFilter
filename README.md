@@ -9,7 +9,7 @@
 ### Supervisor : Heohyeon of Hancom inc. , DaHyunkim of Hancom inc. 
 <br/><br/>
 # Image Pixel Manipulation기반 비트맵 알고리즘으로써 Dongjoon.js 구현
-
+### ![사진](https://github.com/leedongjoon121/ImageFilter/blob/master/total/img_data/dongjoon_js.JPG?raw=true)
 <br/>
 ##  기능 : 8 가지 기능(단, shadow는 Innershadow, FlexibleShadow, OuterShadow)
 ## black&white , Brightness, Contrast, Shadow, grayscale, Neon, Reflection, SoftEdge 
