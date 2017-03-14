@@ -1,0 +1,146 @@
+<html>
+
+<head>
+    <title>Neon</title>
+</head>
+
+<body>
+    <div align="center">
+        <H2>HTML5 Canvas 2D Image Filter</H2>
+        <H3>Neon</H3> </div>
+    <div style="padding:30px">
+        <script src="jscolor.js"></script>
+        <Table border="1" align="center">
+            <tr>
+                <td align="center" width="50">List</td>
+                <td align="center">Menu </td>
+                <td align="center">Control </td>
+            </tr>
+            <Tr>
+                <td align="center">1</td>
+                <td> Neon 크기 조절 </td>
+                <td>
+                    <input id="blur_control" style="display:block" type="range" min="0" max="300" /> </td>
+            </Tr>
+            <tr>
+                <td align="center">2</td>
+                <td> Neon 투명도 조절 </td>
+                <td>
+                    <input id="opacity_control" style="display:block" type="range" min="0" max="1" step="0.1" /> </td>
+            </tr>
+            <tr>
+                <td align="center">3</td>
+                <td> Neon 색상 조절 </td>
+                <td>
+                    <input id="colorpicker" class="jscolor" value="ab2567"> </td>
+            </tr>
+            <tr>
+                <td colspan="3" align="center">
+                    <input id="fileopen" type="file" /> </td>
+            </tr>
+        </Table>
+    </div>
+    <div style="padding:30px">
+        <Table align="center">
+            <Tr align="center">
+                <Td>Original</Td>
+                <Td>Neon</Td>
+            </Tr>
+            <Tr>
+                <Td style="vertical-align:top;">
+                    <canvas id="original_img" /> </Td>
+                <Td style="vertical-align:top;">
+                    <canvas id="converted_img"></canvas>
+                </Td>
+            </Tr>
+        </Table>
+    </div>
+    <!----------------------import js --------------------->
+    <script type="text/javascript" charset="utf-8" src="dongjoon.js"></script>
+    <script type="text/javascript" charset="utf-8">
+        var original_image = document.getElementById('original_img');
+        var original_convert_context = original_image.getContext('2d');
+        var convert_image = document.getElementById('converted_img');
+        var convert_context = convert_image.getContext('2d');
+        var fileopen = document.getElementById('fileopen');
+        var blur_control = document.getElementById('blur_control'); // neon의 크기에 대한 값을 조정해 주는 변수
+        var Opacity_control = document.getElementById('opacity_control'); // neon의 투명도에 대한 값을 조정해 주는 변수
+        var colorPicker = document.getElementById('colorpicker'); // neon의 color를 지정하기 위한 변수
+        colorPicker.value = "ff0000"; // 초기값을 빨간색으로 잡고
+        colorPicker.onchange = function (event) { // 사용자가 색상 조절 부분을 클릭하고 
+            console.log(event.target.value);
+            Datalist['color'] = '#' + event.target.value; // 그 값에따라 neon의 색상이 변경 되도록 구성함
+            update(); // 변경된 색상을 update를 통해 적용 시킴 
+        };
+        blur_control.value = 0; // 초기 neon의 값은 0으로 지정 
+        Opacity_control.value = 0; // 초기 opacity 값은 0으로 지정 
+        var Datalist = {}; // 변경되는 데이터를 유지시키며 값을 조절하기 위한 Datastore 
+        Datalist['blur'] = 0; // 초기 blur(neon)의 값은 0 
+        Datalist['alpha'] = parseFloat(5); // 초기 alpha(opacity)값은 0
+        Datalist['color'] = '#ff0000'; // 초기 색상값은 빨강
+        
+        blur_control.addEventListener('input', function (event) { // 사용자가 neon의 값을 스크롤로 조절하기 위한 listner
+            var blur = parseInt(event.target.value); // 사용자가 선택한 스크롤 포인터를 blur 변수에 담고
+            Datalist['blur'] = blur; // datastore의 값에 대입한후
+            update(); // 그 값을 갱신함 
+        });
+        Opacity_control.addEventListener('input', function (event) { // 사용자가 opacity의 값을 스크롤로 조절하기 위한 listner
+            var alpha = parseFloat(event.target.value); // 사용자가 선택한 스크롤 포인터를 alpha 변수에 담고 
+            Datalist['alpha'] = alpha; // datastore의 값에 대입한후 
+            update(); // 그 값을 갱신함 
+        });
+
+        function setScale(canvas, width, height) { // 변경되는 neon의 값에 따라 canvas를 수정해 주기 위한 setter 함수
+            canvas.width = width; // canvas 너비 조절 
+            canvas.height = height; // canvas 높이 조절
+        }
+        
+        fileopen.onchange = function (event) {
+            console.log(this.value);
+            /* Loading */
+            var tgt = event.target || window.event.srcElement;
+            var files = tgt.files;
+            // FileReader support
+            if (FileReader && files && files.length) {
+                var fr = new FileReader();
+                var image_load_tag = new Image(); // 사용자가 선택한 이미지를 로드함 
+                image_load_tag.onload = function () {
+                    initalize_image(image_load_tag); // 이미지를 초기화 시키는 함수로 인자값을 전달하여 canvas에 적용시킴
+                }
+                fr.onload = function () {
+                    image_load_tag.src = fr.result;
+                }
+                fr.readAsDataURL(files[0]);
+                delete image_load_tag;
+                delete fr;
+            }
+            else {}
+        }
+
+        function update() { // 사용자가 스크롤을 통해 변경하는 값에 따라 neon effect를 적용시키기 위한 update 함수
+            var blur = Datalist.blur;
+            var alpha = Datalist.alpha;
+            var color = Datalist.color;
+            // datastore에 저장된 값을 불러와서 
+            convert_context.clearRect(0, 0, convert_image.width, convert_image.height); // 이전 값들을 초기화 시켜주는 메서드
+            convert_image.width = parseFloat(original_image.width) + parseFloat(blur); // convert canvas의 크기를 원본이미지 + blur값 만큼 증가시킴 
+            convert_image.height = parseFloat(original_image.height) + parseFloat(blur);
+            Ori_DoNeon(convert_context, original_image, blur, 1 - alpha, color); // 사용자가 지정한 값들을 인자값들로 전달하여 neon effect를 구현시킴
+        }
+
+        function initalize_image(imageObj) { // 초기 neon effect의 값을 setting 해주는 함수
+            Datalist['blur'] = 0; // neon 값은 0으로 초기화 
+            Datalist['alpha'] = parseFloat(0); // opacity 값도 0으로 초기화
+            Datalist['color'] = '#ff0000'; // 색상은 빨강
+            var blur = Datalist.blur; // datastore에 저장되어 있는 값을 바탕으로 사이즈를 조정하기 위함 
+            original_image.width = imageObj.width;
+            original_image.height = imageObj.height;
+            convert_image.width = parseFloat(original_image.width) + parseFloat(blur); // convert_image의 크기는 원본이미지 + neon의 크기
+            convert_image.height = parseFloat(original_image.height) + parseFloat(blur);
+            original_convert_context.drawImage(imageObj, 0, 0); // 원본 이미지를 그리고 
+            update(); // 업데이트 시켜 값을 적용함 
+        }
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,125 @@
+<!-- 
+ 기본 제공되는 Shadow API를 사용하여 Inner Shadow를 구현 하였다.
+ Blur 값과 globalAlpha 값을 조정하며 Inner Shadow의 값을 조절 할 수 있다.
+ 이 Project의 구성은 Inner_Shadow_api.html 하나의 file로 구성 된다.
+-->
+<html>
+
+<head>
+    <title>InnerShadow</title>
+</head>
+
+<body>
+    <div style="padding:30px">
+        <div> Inner Shadow made by shadow api </div>
+        <input id="fileopen" type="file" />
+        <input id="middle" type="button" value="InnerShadow 적용!!" /> </div>
+    <div style="padding:30px">
+        <Table align="center">
+            <Tr>
+                <Td style="vertical-align:top;">
+                    <canvas id="original_img" /> </Td>
+                <Td style="vertical-align:top;">
+                    <canvas id="converted_img"></canvas>
+                </Td>
+            </Tr>
+        </Table>
+    </div>
+    <script type="text/javascript" charset="utf-8">
+        var orig_img = document.getElementById('original_img');
+        var orig_context = orig_img.getContext('2d');
+        var convert_image = document.getElementById('converted_img');
+        var convert_context = convert_image.getContext('2d');
+        var fileopen = document.getElementById('fileopen');
+        /* Inner Shadow 효과를 처리하는 함수이다.
+         1. tempcanvas를 생성하여 image와 사이즈를 조정하고
+         2. 원본 이미지를 먼저 셋팅해 놓고
+         3. 원본 이미지를 pixel manipulation을 통해 반전을 시켜 놓고
+         4. 이미지에 기본 shadow api를 사용하여 색상, 투명도, 위치, blur 값 등을 적용하여 테두리를 생성하고 
+         5. 도형합성(destination-atop)을 사용하여 셋팅해 놓은 테두리 값과 원본 이미지를 합성하여 Inner Sadow 구현
+        */
+        function select() {
+            var Blur_value = 30;
+            var shadow_offset = 20;
+            var shadow_offsetX;
+            var shadow_offsetY;
+            middle.onclick = function (event) {
+                var tempCanvas = document.createElement('canvas');
+                tempCanvas.width = convert_image.width;
+                tempCanvas.height = convert_image.height; // 1.
+                var tempContext = tempCanvas.getContext('2d');
+                tempContext.drawImage(orig_img, shadow_offset, shadow_offset); // 2.
+                var imageData = tempContext.getImageData(0, 0, convert_image.width, convert_image.height);
+                var pixels = imageData.data;
+                for (var i = 0; i < pixels.length; i += 4) {
+                    pixels[i] = 0;
+                    pixels[i + 1] = 0;
+                    pixels[i + 2] = 0;
+                    pixels[i + 3] ^= 255;
+                }
+                tempContext.putImageData(imageData, 0, 0); // 3.
+                
+                var blur = 20;
+                var pos = blur / 20;
+                for (var x = -1; x <= 1; x++) {
+                    for (var y = -1; y <= 1; y++) {
+                        convert_context.save();
+                        convert_context.shadowColor = '#2B2B2B';
+                        convert_context.globalAlpha = 0.3;
+                        convert_context.shadowOffsetX = pos * x;
+                        convert_context.shadowOffsetY = pos * y;
+                        convert_context.shadowBlur = blur;
+                        convert_context.drawImage(tempCanvas, 0, 0);
+                        convert_context.restore();
+                    } //4.
+                }
+                convert_context.save();
+                convert_context.globalCompositeOperation = "destination-atop";
+                convert_context.drawImage(orig_img, shadow_offset, shadow_offset); // 5.
+                convert_context.restore();
+            }
+            
+        }
+        // shadow의 offset값과 blur 값에 따라 canvas의 사이즈를 조정해 주기 위한 Datastore
+        var Datalist = {};
+        Datalist['sha_off'] = 20;
+        Datalist['Blur_V'] = 30;
+        
+        fileopen.onchange = function (event) { // file open
+            console.log(this.value);
+            /* Loading */
+            var tgt = event.target || window.event.srcElement;
+            var files = tgt.files;
+            // FileReader support
+            if (FileReader && files && files.length) {
+                var fr = new FileReader();
+                var image_load_tag = new Image();
+                image_load_tag.onload = function () {
+                    var Blur_value = 30;
+                    var shadow_offset = 20;
+                    orig_img.width = image_load_tag.width;
+                    orig_img.height = image_load_tag.height;
+                    orig_context.drawImage(image_load_tag, 0, 0);
+                    drawImage(image_load_tag);
+                }
+                fr.onload = function () {
+                    image_load_tag.src = fr.result;
+                }
+                fr.readAsDataURL(files[0]);
+                delete image_load_tag;
+                delete fr;
+            }
+            else {}
+        }
+        select();
+
+        function drawImage() { // shadow offset값과 blur 값에 따라서 canvas의 사이즈 조절 
+            var shadow_offset = Datalist.sha_off;
+            var Blur_value = Datalist.Blur_V;
+            convert_image.width = orig_img.width + (shadow_offset + (Blur_value * 1.2)) * 2;
+            convert_image.height = orig_img.height + (shadow_offset + (Blur_value * 1.2)) * 2;
+        }
+    </script>
+</body>
+
+</html>

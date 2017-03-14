@@ -1,0 +1,137 @@
+<html>
+
+<head>
+    <title>SoftEdge</title>
+</head>
+
+<body>
+    <div style="padding:30px">
+        <input id="fileopen" type="file" />
+        <input id="one" type="button" value="1단계" />
+        <input id="two" type="button" value="2단계" />
+        <input id="three" type="button" value="3단계" />
+        <input id="four" type="button" value="4단계" />
+    </div>
+    <div style="padding:30px">
+        <Table align="center">
+            <Tr>
+                <Td>
+                    <canvas id="original_img" /> </Td>
+                <Td>
+                    <canvas id="converted_img"></canvas>
+                </Td>
+            </Tr>
+        </Table>
+    </div>
+    <script type="text/javascript" charset="utf-8" src="dongjoon.js"></script>
+    <script type="text/javascript" charset="utf-8">
+        var orig_img = document.getElementById('original_img');
+        var orig_context = orig_img.getContext('2d');
+        var convert_image = document.getElementById('converted_img');
+        var convert_context = convert_image.getContext('2d');
+        var fileopen = document.getElementById('fileopen');
+        var one = document.getElementById('one');
+        var two = document.getElementById('two');
+        var three = document.getElementById('three');
+        var four = document.getElementById('four');
+        one.onclick = function (event) {
+            Datalist['Blur_V'] = 5;
+            update(true);
+        };
+        two.onclick = function (event) {
+            Datalist['Blur_V'] = 15;
+            update(true);
+        };
+        three.onclick = function (event) {
+            Datalist['Blur_V'] = 30;
+            update(true);
+        };
+        four.onclick = function (event) {
+            Datalist['Blur_V'] = 50;
+            update(true);
+        };
+
+        function update() {
+            var Blur_value = Datalist['Blur_V'];
+            var shadow_offset = 20;
+            setScale(convert_image, orig_img.width + (shadow_offset + (Blur_value * 1.2)) * 2, orig_img.height + (shadow_offset + (Blur_value * 1.2)) * 2);
+            draw_SoftEdge(Blur_value);
+        };
+
+        /* SoftEdge 구현 함수
+         1. canvas의 크기를  blur 값과 shadow offset값에 따라 조정 하고 이미지를 draw하고
+         2. 이미지에 대해 9가지 방향으로 기본 제공 Shadow API를 이용하여 shadow효과를 적용 시키고 
+            draw한 이미지와 9가지 방향으로 적용시킨 shadow와 도형 합성을 통하여 이미지의 Edge를 추출하고
+         3. 추출한 Edge와 원본 이미지를 도형 합성으로 겹치는 부분을 투명하게 만들고
+         4. 다시한번 더 원본 이미지를 draw하여 테두리가 아닌 부분에 blur 처리가 되는 사항을 보완해 준다.
+        */
+        function draw_SoftEdge(Blur_value) {
+            drawImage();
+            var shadow_offsetX = 0;
+            var shadow_offsetY = 0;
+            var shadow_offset = 20;
+            convert_context.drawImage(orig_img, shadow_offset + (Blur_value * 1.2), shadow_offset + (Blur_value * 1.2));
+            convert_context.save();
+            convert_context.globalCompositeOperation = "destination-in";
+            var blur = Blur_value;
+            var pos = blur / 20;
+            for (var x = -1; x <= 1; x++) {
+                for (var y = -1; y <= 1; y++) {
+                    convert_context.save();
+                    convert_context.shadowColor = '#8C8C8C';
+                    convert_context.shadowOffsetX = pos * x;
+                    convert_context.shadowOffsetY = pos * y;
+                    convert_context.shadowBlur = blur;
+                    convert_context.drawImage(orig_img, shadow_offset + (Blur_value * 1.2), shadow_offset + (Blur_value * 1.2));
+                    convert_context.restore();
+                }
+            }
+            
+            convert_context.drawImage(orig_img, shadow_offset + (Blur_value * 1.2), shadow_offset + (Blur_value * 1.2));
+            convert_context.restore(); 
+            convert_context.save();
+            convert_context.globalCompositeOperation = "destination-in";
+            convert_context.drawImage(orig_img, shadow_offset + (Blur_value * 1.2), shadow_offset + (Blur_value * 1.2));
+            convert_context.restore();
+        
+        };
+        
+        var Datalist = {};
+        Datalist['Blur_V'] = 0;
+        fileopen.onchange = function (event) {
+            console.log(this.value);
+            /* Loading */
+            var tgt = event.target || window.event.srcElement;
+            var files = tgt.files;
+            // FileReader support
+            if (FileReader && files && files.length) {
+                var fr = new FileReader();
+                var image_load_tag = new Image();
+                image_load_tag.onload = function () {
+                    var Blur_value = 30;
+                    var shadow_offset = 20;
+                    orig_img.width = image_load_tag.width;
+                    orig_img.height = image_load_tag.height;
+                    orig_context.drawImage(image_load_tag, 0, 0);
+                    drawImage(image_load_tag);
+                }
+                fr.onload = function () {
+                    image_load_tag.src = fr.result;
+                }
+                fr.readAsDataURL(files[0]);
+                delete image_load_tag;
+                delete fr;
+            }
+            else {}
+        }
+
+        function drawImage() {};
+
+        function setScale(canvas, width, height) {
+            canvas.width = width;
+            canvas.height = height;
+        }
+    </script>
+</body>
+
+</html>

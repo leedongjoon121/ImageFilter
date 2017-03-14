@@ -1,0 +1,193 @@
+<html>
+
+<head>
+    <title>Shadow</title>
+</head>
+
+<body>
+    <div align="center">
+        <H2>HTML5 Canvas 2D Image Filter</H2>
+        <H4>Shadow</H4> </div>
+    <div style="padding:30px">
+        <table border="1" align="center">
+            <Tr>
+                <td align="center" width="50">List</td>
+                <td width="80" align="center">Position</td>
+                <td width="250" align="center">Control</td>
+            </Tr>
+            <tr>
+                <td align="center">1</td>
+                <td align="center">Top </td>
+                <td>
+                    <input id="left_top" type="button" value="왼쪽_위" />
+                    <input id="Tops" type="button" value="위" />
+                    <input id="right_top" type="button" value="오른쪽_위" /> </td>
+            </tr>
+            <tr>
+                <td align="center">2</td>
+                <td align="center">Center</td>
+                <td>
+                    <input id="left" type="button" value="왼쪽" />
+                    <input id="middle" type="button" value="가운데" />
+                    <input id="right" type="button" value="오른쪽" /> </td>
+            </tr>
+            <tr>
+                <td align="center">3</td>
+                <td align="center">Bottom</td>
+                <td>
+                    <input id="left_bottom" type="button" value="왼쪽아래" />
+                    <input id="bottom" type="button" value="아래" />
+                    <input id="right_bottom" type="button" value="오른쪽아래" /> </td>
+            </tr>
+            <tr>
+                <td colspan="3" align="center">
+                    <input id="fileopen" type="file" /> </td>
+            </tr>
+        </table>
+    </div>
+    <div style="padding:30px">
+        <Table align="center">
+            <Tr align="center">
+                <Td>Original</Td>
+                <Td>Shadow</Td>
+            </Tr>
+            <Tr>
+                <Td>
+                    <canvas id="original_img" /> </Td>
+                <Td>
+                    <canvas id="converted_img"></canvas>
+                </Td>
+            </Tr>
+        </Table>
+    </div>
+    <!----------------------import js --------------------->
+    <script type="text/javascript" charset="utf-8" src="dongjoon.js"></script>
+    <script type="text/javascript" charset="utf-8">
+        var orig_img = document.getElementById('original_img');
+        var orig_context = orig_img.getContext('2d');
+        var convert_image = document.getElementById('converted_img');
+        var convert_context = convert_image.getContext('2d');
+        var fileopen = document.getElementById('fileopen');
+
+        function select() {
+            var Blur_value = 30; //blur 값을 조절하는 변수
+            var shadow_offset = 20; 
+            var shadow_offsetX; // shadow의 x좌표
+            var shadow_offsetY; // shadiw의 y좌표
+            
+            // 각 버튼마다 설정된 방향에 맞춰서 shadow_offsetX, shadow_offsetY 값이 달라진다.
+            // 사용자가 버튼을 클릭 할때마다  image를 draw한다.
+            right_bottom.onclick = function (event) {
+                drawImage();
+                shadow_offsetX = 20;
+                shadow_offsetY = 20;
+                Blur_value = 30;
+                Ori_Draw_shadow(convert_context, orig_img, shadow_offsetX, shadow_offsetY, Blur_value, shadow_offset);
+            };
+            bottom.onclick = function (event) {
+                drawImage();
+                shadow_offsetX = 0;
+                shadow_offsetY = 20;
+                Blur_value = 30;
+                Ori_Draw_shadow(convert_context, orig_img, shadow_offsetX, shadow_offsetY, Blur_value, shadow_offset);
+            };
+            left_bottom.onclick = function (event) {
+                drawImage();
+                shadow_offsetX = -20;
+                shadow_offsetY = 20;
+                Blur_value = 30;
+                Ori_Draw_shadow(convert_context, orig_img, shadow_offsetX, shadow_offsetY, Blur_value, shadow_offset);
+            };
+            right.onclick = function (event) {
+                drawImage();
+                shadow_offsetX = 20;
+                shadow_offsetY = 0;
+                Blur_value = 30;
+                Ori_Draw_shadow(convert_context, orig_img, shadow_offsetX, shadow_offsetY, Blur_value, shadow_offset);
+            };
+            
+            
+            // middle은 shadow_offsetX,shadow_offsetY의 값을 0으로 설정해준다. 0,0으로 설정을 해야 원본 기준으로 가운데에  shadow 를 설정할 수 있기 때문
+            middle.onclick = function (event) { 
+                drawImage();
+                Blur_value = 30;
+                shadow_offsetX = 0;
+                shadow_offsetY = 0;
+                shadow_offset = 20;
+                Ori_middle_Draw_shadow(convert_context, orig_img, shadow_offset, Blur_value); // 따로 설정해 놓은 함수를 사용한다.
+            };
+            left.onclick = function (event) {
+                drawImage();
+                shadow_offsetX = -20;
+                shadow_offsetY = 0;
+                Blur_value = 30;
+                Ori_Draw_shadow(convert_context, orig_img, shadow_offsetX, shadow_offsetY, Blur_value, shadow_offset);
+            };
+            right_top.onclick = function (event) {
+                drawImage();
+                shadow_offsetX = 20;
+                shadow_offsetY = -20;
+                Blur_value = 30;
+                Ori_Draw_shadow(convert_context, orig_img, shadow_offsetX, shadow_offsetY, Blur_value, shadow_offset);
+            };
+            Tops.onclick = function (event) {
+                drawImage();
+                shadow_offsetX = 0;
+                shadow_offsetY = -20;
+                Blur_value = 30;
+                Ori_Draw_shadow(convert_context, orig_img, shadow_offsetX, shadow_offsetY, Blur_value, shadow_offset);
+            };
+            left_top.onclick = function (event) {
+                drawImage();
+                shadow_offsetX = -20;
+                shadow_offsetY = -20;
+                Blur_value = 30;
+                Ori_Draw_shadow(convert_context, orig_img, shadow_offsetX, shadow_offsetY, Blur_value, shadow_offset);
+            };
+        };
+        
+        var Datalist = {};
+        Datalist['sha_off'] = 20;
+        Datalist['Blur_V'] = 30;
+        
+        
+        
+        fileopen.onchange = function (event) {
+            console.log(this.value);
+            /* Loading */
+            var tgt = event.target || window.event.srcElement;
+            var files = tgt.files;
+            // FileReader support
+            if (FileReader && files && files.length) {
+                var fr = new FileReader();
+                var image_load_tag = new Image(); // 이미지를 로드하고
+                image_load_tag.onload = function () {
+                    var Blur_value = 30; // blur의 값
+                    var shadow_offset = 20;         
+                    orig_img.width = image_load_tag.width;
+                    orig_img.height = image_load_tag.height;
+                    orig_context.drawImage(image_load_tag, 0, 0);   
+                    drawImage(image_load_tag); // 로드된 값으로 이미지를 draw함
+                }
+                fr.onload = function () {
+                    image_load_tag.src = fr.result;
+                }
+                fr.readAsDataURL(files[0]);
+                delete image_load_tag;
+                delete fr;
+            }
+            else {}
+        }
+
+        select();
+        
+        function drawImage() {
+            var shadow_offset = Datalist.sha_off;
+            var Blur_value = Datalist.Blur_V;
+            convert_image.width = orig_img.width + (shadow_offset + (Blur_value * 1.2)) * 2;
+            convert_image.height = orig_img.height + (shadow_offset + (Blur_value * 1.2)) * 2;
+        }
+    </script>
+</body>
+
+</html>

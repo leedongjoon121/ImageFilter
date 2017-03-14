@@ -1,0 +1,171 @@
+<html>
+
+<head>
+    <title>Reflection</title>
+</head>
+
+<body>
+    <div align="center">
+        <H2>HTML5 Canvas 2D Image Filter</H2>
+        <H3>Reflection</H3> </div>
+    <div style="padding:30px">
+        <table border="1" align="center">
+            <tr>
+                <td align="center" width="50">List</td>
+                <td width="80" align="center">Menu</td>
+                <td align="center">Control</td>
+            </tr>
+            <tr>
+                <td align="center">1</td>
+                <td> 거리조절 </td>
+                <td width>
+                    <input id="Zero_pt" type="button" value="0 pt" />
+                    <input id="Four_pt" type="button" value="4 pt" />
+                    <input id="Eight_pt" type="button" value="8 pt" /> </td>
+            </tr>
+            <tr>
+                <td align="center">2</td>
+                <td>크기조절 </td>
+                <td>
+                    <input id="one_three" type="button" value="1/3크기" />
+                    <input id="one_two" type="button" value="1/2크기" />
+                    <input id="three_four" type="button" value="3/4크기" />
+                    <input id="all" type="button" value="전체크기" />
+                    <input id="all_re" type="button" value="전체반사" /> </td>
+            </tr>
+            <tr>
+                <td colspan="3" align="center">
+                    <input id="fileopen" type="file" /> </td>
+            </tr>
+        </table>
+    </div>
+    <div style="padding:30px">
+        <Table align="center">
+            <Tr align="center">
+                <Td>Original</Td>
+                <Td>Reflection</Td>
+            </Tr>
+            <Tr>
+                <Td style="vertical-align:top;">
+                    <canvas id="original_img" /> </Td>
+                <Td style="vertical-align:top;">
+                    <canvas id="converted_img" /> </Td>
+            </Tr>
+        </Table>
+    </div>
+    <!----------------------import js --------------------->
+    <script type="text/javascript" charset="utf-8" src="dongjoon.js"></script>
+    <script type="text/javascript" charset="utf-8">
+        // input tag for file open
+        var fileopen = document.getElementById('fileopen');
+        // source image (원본)
+        var original_image = document.getElementById('original_img');
+        var original_context = original_image.getContext('2d');
+        // converted image (변환된 image)
+        var convert_image = document.getElementById('converted_img');
+        var convert_context = convert_image.getContext('2d');
+        var Two_12 = document.getElementById('two_12');
+        var Two_34 = document.getElementById('two_34');
+        var Two_a = document.getElementById('two_a');
+        var Two_ar = document.getElementById('two_ar');
+        // data store 용 object
+        var Datalist = {}; // 파라미터를 저장해놓는 공간 
+        Datalist['padding'] = 0; // padding 값을 저장해 놓음, 초기갑승ㄴ 0 
+        Datalist['control'] = parseFloat(0); // control값을 저장해 놓을 임시변수
+        Datalist['gradient'] = true; // gradient effect를 적용할지 안할지 결정해주는 flag 로써 true로 설정되면 js에 셋팅해 놓은 gradient 값을 control 변수를 통해 셋팅해준다.
+        function addEventListers(imageObj) { // 사용자가 버튼을 누름에 따라 각 설정해 놓은 셋팅값이 datastore에 저장되어 update()를 통해 값이 적용된다.
+            Zero_pt.onclick = function (event) {
+                Datalist['padding'] = 0;
+                update(true);
+            };
+            Four_pt.onclick = function (event) {
+                Datalist['padding'] = 12;
+                update(true);
+            };
+            Eight_pt.onclick = function (event) {
+                Datalist['padding'] = 20;
+                update(true);
+            };
+            // 거리 조절을 하는 부분으로써 각 버튼마다 padding값이 다르다.  사용자가 버튼을 누름으로써 datastore에 값이 update된다.
+            one_three.onclick = function (event) {
+                Datalist['control'] = 0.35;
+                Datalist['gradient'] = true;
+                update(true);
+            };
+            one_two.onclick = function (event) {
+                Datalist['control'] = 0.50;
+                Datalist['gradient'] = true;
+                update(true);
+            };
+            three_four.onclick = function (event) {
+                Datalist['control'] = 0.75;
+                Datalist['gradient'] = true;
+                update(true);
+            };
+            all.onclick = function (event) {
+                Datalist['control'] = 1.0;
+                Datalist['gradient'] = true;
+                update(true);
+            };
+            // gradient값을 조절하는 부분으로써 각 버튼마다 control값이 다르고, 이 control 값에따라 addstop에 적용되어 gradient가 조절된다. 또한 사용자가 버튼을 누름으로써
+            // datastore에 값이 update 된다.
+            all_re.onclick = function (event) { // 밝기 값만 적용됨 
+                Datalist['control'] = 1.0;
+                Datalist['gradient'] = false; // gradient flag를 false로 설정하였기 때문에 gradient가 적용되지 않는다.
+                update(false); // update 도 false로 설정해주었기 때문에 데이터가 갱신되지 않는다.
+                // 기본설정된 밝기 값 (+100)만 적용된 상태로 reflection 되서 나타남
+            };
+        }
+        addEventListers(); // 사용자가 버튼들중 하나를 클릭하여 datastore에 저장함, 선언과 동시에 호출도 됨 자바스크립트 특성으로써ㅡ, 별도로 지정하지 않아도 실행이 됨. 꼭 function 내에서만 이루어지는것이 아님
+        function update() { // 수정이 일어나는 사항들을에 대해서 값을 update 시켜주는 함수
+            var padding = Datalist['padding'];
+            var control = Datalist['control'];
+            var gradient = Datalist['gradient'];
+            // 사용자가 버튼을 눌렀을때 각각의 상황에 맞춰 datastore에 저장된 값이 전달되어 그 값을 바탕으로 각 인자값들로 사용함 
+            setScale(convert_image, original_image.width, original_image.height * 2 + padding); // 전달된 값의 canvas 크기를 조절하기 위해 setter 함수에 인자값들 전달함 , 이때 높이 부분을 reflection이니깐 두배 증가시키고 padding 사이즈만큼 더 늘림
+            Ori_reflection(convert_image, original_image, padding, control, gradient); // 이제 본격적으로 canvas에 사용자가 선택한 버튼정보를 바탕으로한 reflection effect를 나타냄 
+        }
+        
+        fileopen.onchange = function (event) {
+            console.log(this.value);
+            /* Loading */
+            var tgt = event.target || window.event.srcElement;
+            var files = tgt.files;
+            // FileReader support
+            if (FileReader && files && files.length) {
+                var fr = new FileReader();
+                var image_load_tag = new Image(); // 이미지를 로드하고 
+                image_load_tag.onload = function () {
+                    initalize_image(image_load_tag); // 이미지를 초기화 시키는 함수로 인자값을 전달하여 canvas에 적용시킴
+                }
+                fr.onload = function () {
+                    image_load_tag.src = fr.result;
+                }
+                fr.readAsDataURL(files[0]);
+                delete image_load_tag;
+                delete fr;
+            }
+            else {}
+        }
+
+        function setScale(canvas, width, height) { // setter 함수
+            canvas.width = width; // canvas의 너비와 높이를 셋팅 한다. 각각에 해당하는 canvas와 너비/높이 값을 인자값으로 
+            // 넘기면 그 값들을 바탕으로 하나의 canvas size를 구성한다.
+            canvas.height = height;
+        }
+
+        function initalize_image(imageObj) { // 초기화 함수로써
+            Datalist['padding'] = 0; // 초기 padding값은 0 
+            Datalist['control'] = parseFloat(0.5); // 초기 control 값은 0.5
+            Datalist['gradient'] = true; // 초기 gradient 값은 true 
+            var padding = Datalist.padding; // datastore에 저장되 있는 값을 padding으로 사용
+            var control = Datalist.control; // datastore에 저장되어 있는 값을 control로 사용
+            setScale(original_image, imageObj.width, imageObj.height); //original canvas의  크기를 조정하기 위해 setter 함수에 넘김
+            setScale(convert_image, imageObj.width, imageObj.height * 2 + padding); // convert canvas의 크기를 조절하기 위해 setter 함수에 넘김 
+            original_context.drawImage(imageObj, 0, 0); // original context의 이미지를 draw함
+            update(); // 지금까지 수행된 사항들을 update
+        }
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,130 @@
+<html>
+
+<head>
+    <title>Black and white</title>
+</head>
+
+<body>
+    <div align="center">
+        <H2>HTML5 Canvas 2D Image Filter</H2>
+        <H3>Black and white</H3> </div>
+    <div style="padding:30px">
+        <table border="1" align="center">
+            <tr>
+                <td align="center" width="50">List</td>
+                <td align="center" width="100">Menu</td>
+                <td align="center">Control</td>
+            </tr>
+            <tr>
+                <td align="center">1</td>
+                <td align="center">되돌리기</td>
+                <td>
+                    <input id="original_button" type="button" value="Original" /> </td>
+            </tr>
+            <tr>
+                <td align="center">2</td>
+                <td align="center">흑백효과</td>
+                <td>
+                    <input id="filter" type="button" value="BlackandWhite" /> </td>
+            </tr>
+            <tr>
+                <td colspan="3">
+                    <input id="fileopen" type="file" /> </td>
+            </tr>
+        </table>
+    </div>
+    <div style="padding:30px">
+        <Table align="center">
+            <Tr align="center">
+                <Td>Original</Td>
+                <Td>Black and white</Td>
+            </Tr>
+            <Tr>
+                <Td>
+                    <canvas id="original_img" /> </Td>
+                <Td>
+                    <canvas id="converted_img"></canvas>
+                </Td>
+            </Tr>
+        </Table>
+    </div>
+    <script type="text/javascript" charset="utf-8" src="dongjoon.js"></script>
+    <!----------------------import js --------------------->
+    <script type="text/javascript" charset="utf-8">
+        var original_convert_image = document.getElementById('original_img');
+        var original_convert_context = original_convert_image.getContext('2d');
+        var convert_image = document.getElementById('converted_img');
+        var convert_context = convert_image.getContext('2d');
+        var fileopen = document.getElementById('fileopen');
+        var filter_img = document.getElementById('filter');
+        var return_to_original = document.getElementById('original_button'); //original 버튼
+        /*
+        * converted된 image를 convert 되기전 original image로 다시 변경하는 함수
+        * 변수 : @imageData = original_ImageData를 저장, @px = imageData의 픽셀값 
+        * 구현 방식 :  original_convert_context의 getImageData를 통해  원본 이미지의 ImageData를   
+                   -> convert_context의 putImageData 통해 수정할 context의 파라미터로 넣어준다. 
+        */
+        return_to_original.onclick = function (event) {
+            console.log('original_button');
+            var imageData = original_convert_context.getImageData(0, 0, original_convert_image.width, original_convert_image.height);
+            convert_context.putImageData(imageData, 0, 0);
+        };
+        /*
+        * black and white로 변환하는 함수, <input type = button>을 통해 click됨
+        * 변수 : @imageData = original_ImageData를 저장, @px = imageData의 픽셀값, @len = px의 길이
+        * 함수 : @BlackandWhite = px값을 BlackandWhite로 변환 해주는 알고리즘 함수
+        * 구현방식 : original_convert_context의 getImageData를 통해  원본 이미지의 ImageData 를  
+            -> script_blackandwhite.js의 BlackandWhite() 함수를 통해 px 값을 변경 시켜서 
+            -> convert_context의 putImageData 통해 수정할 context의 파라미터로 넣어준다. 
+        */
+        filter_img.onclick = function (event) {
+            console.log('filter_convert_button');
+            var imageData = original_convert_context.getImageData(0, 0, original_convert_image.width, original_convert_image.height);
+            var px = imageData.data;
+            var len = px.length;
+            Ori_BlackandWhite(px);
+            convert_context.putImageData(imageData, 0, 0);
+        };
+        /*
+         * 이미지를 선택하여 canvas로 변경해주는 함수 ->이미지를 로드할때만 사용하고 canvas화 시킨후엔 delete시킴. 
+         * 변수 : @ image_load_tag = 이미지를 로드하고, canvas에 draw함, @fr : file을 읽어올때 사용됨
+         * 함수 : @fr.onload = function() : 이미지를 url로부터 읽어올수 있게 경로 설정, @image_load_tag.onload = function () : 읽어온 이미지를 canvas에 draw
+         */
+        fileopen.onchange = function (event) {
+                console.log(this.value);
+                /* Loading */
+                var tgt = event.target || window.event.srcElement;
+                var files = tgt.files;
+                // FileReader support
+                if (FileReader && files && files.length) {
+                    var fr = new FileReader();
+                    var image_load_tag = new Image();
+                    image_load_tag.onload = function () {
+                        drawImage(image_load_tag);
+                    }
+                    fr.onload = function () {
+                        image_load_tag.src = fr.result;
+                    }
+                    fr.readAsDataURL(files[0]);
+                    delete image_load_tag;
+                    delete fr;
+                }
+                else {}
+            }
+            /*
+             * original context와 convert context를 draw해주는 함수
+             * 변수 : @imageobj : canvas 이미지 객체
+             * 함수 : @drawImage : imageobj를 canvas에 draw함
+             */
+        function drawImage(imageObj) {
+            console.log('drawImage');
+            original_convert_image.width = imageObj.width;
+            original_convert_image.height = imageObj.height;
+            original_convert_context.drawImage(imageObj, 0, 0);
+            convert_image.width = imageObj.width;
+            convert_image.height = imageObj.height;
+        }
+    </script>
+</body>
+
+</html>
