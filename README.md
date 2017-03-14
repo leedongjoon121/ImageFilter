@@ -8,6 +8,9 @@
 ### day of production : 2016.07.15~ 2016.08.30
 ### Supervisor : Heohyeon of Hancom inc. , DaHyunkim of Hancom inc. 
 <br/><br/>
+# Image Pixel Manipulation기반 비트맵 알고리즘으로써 Dongjoon.js 구현
+
+<br/>
 ##  기능 : 8 가지 기능(단, shadow는 Innershadow, FlexibleShadow, OuterShadow)
 ## black&white , Brightness, Contrast, Shadow, grayscale, Neon, Reflection, SoftEdge 
 <br/><br/>
